@@ -1,0 +1,25 @@
+{
+    "name": "artad/IllustrationManager",
+    "type": "library",
+    "description": "",
+    "keywords": [],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Artem Dudov",
+            "email": "artem.dudov@gmail.com"
+        }     
+    ],
+    "require": {
+        "php": ">=5.4",
+	"pimple/Pimple": ">=2.0",
+	"predis/predis": ">=1.0",
+  	"tedivm/stash": "0.12.*",
+	"symfony/event-dispatcher": ">=1.0",
+	"imagine/imagine": "~0.5.0",
+        "knplabs/gaufrette": "0.1.*"
+    },
+    "autoload": {
+        "psr-4": { "IllustrationManager\\": "src/" }
+    }
+}
