@@ -8,6 +8,7 @@ php:
 
 before_script:
   - composer self-update
+  - composer install
 
 script:
-  - phpunit
+  - phpunit -c tests/ --coverage-clover=coverage.clover
