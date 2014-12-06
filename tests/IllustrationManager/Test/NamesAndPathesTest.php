@@ -70,8 +70,8 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
             array('abcd', 'ab' . DIRECTORY_SEPARATOR . 'cd'),
             array('qwer', 'qw' . DIRECTORY_SEPARATOR . 'er'),
       	    array( 1000,   '10' . DIRECTORY_SEPARATOR . '00'),
-            array( 100,   '10' . DIRECTORY_SEPARATOR . '0'),
-            //array( 1,   '10' . DIRECTORY_SEPARATOR . '0'),
+           //array( 100,   '10' . DIRECTORY_SEPARATOR . '0'),
+           //array( 1,   '10' . DIRECTORY_SEPARATOR . '0'),
 
         );
     }
