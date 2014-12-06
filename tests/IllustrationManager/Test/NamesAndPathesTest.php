@@ -13,13 +13,13 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
         );
 
         $illustrationManagerConfigMock->method('getBaseFolderName')->withAnyParameters()->will($this->returnValue('base'));
-        $illustrationManagerConfigMock->method('getFolderNameForOriginals')->withAnyParameters()->will($this->returnValue('base\original'));
+        $illustrationManagerConfigMock->method('getFolderNameForOriginals')->withAnyParameters()->will($this->returnValue('base/original'));
 
         return new NamesAndPaths($illustrationManagerConfigMock);
     }
 
     /**
-     * 
+     *
      * @return \IllustrationManager\NamesAndPaths
      */
     protected function getNamesAndPathsMock() {
@@ -28,7 +28,7 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
         );
 
         $illustrationManagerConfigMock->method('getBaseFolderName')->withAnyParameters()->will($this->returnValue('base'));
-        $illustrationManagerConfigMock->method('getFolderNameForOriginals')->withAnyParameters()->will($this->returnValue('base\original'));
+        $illustrationManagerConfigMock->method('getFolderNameForOriginals')->withAnyParameters()->will($this->returnValue('base/original'));
 
 
         $namesAndPathsMock = $this->getMock(
@@ -41,7 +41,7 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     * 
+     *
      */
     public function testGetHashForIdMock() {
         $namesAndPathes = $this->getNamesAndPathsMock();
@@ -61,7 +61,7 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
 
 
     /**
-     * 
+     *
      * @return type
      */
     public function providerHashDevide() {
@@ -71,8 +71,8 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
             array('qwer', 'qw' . DIRECTORY_SEPARATOR . 'er'),
       	    array( 1000,   '10' . DIRECTORY_SEPARATOR . '00'),
             array( 100,   '10' . DIRECTORY_SEPARATOR . '0'),
-            array( 1,   '10' . DIRECTORY_SEPARATOR . '0'),
-    
+            //array( 1,   '10' . DIRECTORY_SEPARATOR . '0'),
+
         );
     }
 
@@ -81,7 +81,7 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetPathWFilenameById() {
         $pathWFilename = $this->getNamesAndPathsMock()->getPathWFilenameById(1, 'jpg', 'prefix');
-        $this->assertEquals('12\34\prefix_1234567890.jpg', $pathWFilename);
+        $this->assertEquals('12/34/prefix_1234567890.jpg', $pathWFilename);
     }
 
 
@@ -118,35 +118,35 @@ class NamesAndPathesTest extends \PHPUnit_Framework_TestCase {
         $hash = $this->getNamesAndPaths()->getHashForId(10);
         $this->assertEquals(sha1(10), $hash);
     }
-    
+
         /**
-     
+
      * @param type $hash
      * @param type $path
      */
     public function testGetFullPathWFilename() {
         $pathWFilename = $this->getNamesAndPathsMock()->getFullPathWFilename(1, 'jpg', 'prefix');
-        $this->assertEquals('base\prefix\12\34\prefix_1234567890.jpg', $pathWFilename);
+        $this->assertEquals('base/prefix/12/34/prefix_1234567890.jpg', $pathWFilename);
     }
-    
-    
-    
+
+
+
     /**
      * @dataProvider GetFullPathWFilenameForOriginal
-     * 
+     *
      */
     public function testGetFullPathWFilenameForOriginal($illustrationID, $extension, $hash, $result) {
         $pathWFilename = $this->getNamesAndPathsMock()->getFullPathWFilenameForOriginal($illustrationID, $extension, $hash);
         $this->assertEquals($result, $pathWFilename);
     }
-    
+
     /**
      * @return type
      */
     public function GetFullPathWFilenameForOriginal() {
         return array(
-            array('1', 'jpg', null, 'base\original\12\34\1234567890.jpg'),
-            array('1', 'png', 'qwerty', 'base\original\qw\er\qwerty.png'),
+            array('1', 'jpg', null, 'base/original/12/34/1234567890.jpg'),
+            array('1', 'png', 'qwerty', 'base/original/qw/er/qwerty.png'),
             
         );
     }

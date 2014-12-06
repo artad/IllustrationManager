@@ -9,7 +9,7 @@ class IllustrationManagerConfig {
     protected $useCache = false;
     protected $configForOriginal;
     protected $baseFolderName = 'illustrations';
-    protected $folderNameForOriginals = 'illustrations\original';
+    protected $folderNameForOriginals = 'illustrations/original';
     protected $configsToGenerateAfterUpload = array();
     
     
