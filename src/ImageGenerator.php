@@ -3,7 +3,6 @@
 namespace IllustrationManager;
 
 use IllustrationManager\Format\Format;
-use IllustrationManager\Exception\UndefinedFormatException;
 
 /**
  * Class ImageGenerator
@@ -67,8 +66,8 @@ class ImageGenerator {
      * @param $illustrationID
      * @param $extension
      * @param Format $config
-     * @param null $savePathWFile
-     * @return null|string
+     * @param string $savePathWFile
+     * @return string
      */
     public function makeThumbByID($illustrationID, $extension, Format $config, $savePathWFile = null) {
 
@@ -83,7 +82,7 @@ class ImageGenerator {
 
     /**
      * @param $pathWFilename
-     * @param $savePathWFilename
+     * @param string $savePathWFilename
      * @param $extension
      * @param Format $config
      */

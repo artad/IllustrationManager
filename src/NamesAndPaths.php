@@ -36,7 +36,6 @@ class NamesAndPaths {
 
     /**
      * 
-     * @param integer $id
      * @param string $extension
      * @param string $formatPrefix
      * @return string
@@ -48,7 +47,7 @@ class NamesAndPaths {
 
     /**
      * @param $id
-     * @param $extension
+     * @param string $extension
      * @param string $formatPrefix
      * @return string
      */
@@ -68,7 +67,7 @@ class NamesAndPaths {
     }
 
     /**
-     * @param $hash
+     * @param string $hash
      * @return string
      */
     public function devideHashIntoPath($hash) {

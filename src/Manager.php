@@ -123,7 +123,7 @@ class Manager
 
     /**
      * @param $illustrationID
-     * @param $configHash
+     * @param string $configHash
      * @return string
      */
     protected function checkCache($illustrationID, $configHash)
@@ -133,8 +133,8 @@ class Manager
 
     /**
      * @param $illustrationID
-     * @param $configHash
-     * @param $value
+     * @param string $configHash
+     * @param string $value
      */
     protected function setCache($illustrationID, $configHash, $value)
     {
@@ -143,7 +143,7 @@ class Manager
     }
 
     /**
-     * @param $pathWFile
+     * @param string $pathWFile
      * @return bool
      */
     protected function checkFileExistence($pathWFile)

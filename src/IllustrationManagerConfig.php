@@ -82,7 +82,7 @@ class IllustrationManagerConfig {
     }
 
     /**
-     * @return mixed
+     * @return Format
      */
     public function getConfigForOriginal() {
         return $this->configForOriginal;
