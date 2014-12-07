@@ -193,49 +193,49 @@ class Format {
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getResizeWidth() {
         return $this->resizeWidth;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getResizeHeight() {
         return $this->resizeHeight;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getCropWidth() {
         return $this->cropWidth;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getCropHeight() {
         return $this->cropHeight;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getCropStartPointX() {
         return $this->cropStartPointX;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getCropStartPointY() {
         return $this->cropStartPointY;
     }
 
     /**
-     * @return mixed
+     * @return integer
      */
     public function getRotateAngle() {
         return $this->rotateAngle;
