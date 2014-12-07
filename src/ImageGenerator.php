@@ -2,34 +2,59 @@
 
 namespace IllustrationManager;
 
-use IllustrationManager\Config\Config;
+use IllustrationManager\Format\Format;
 use IllustrationManager\Exception\UndefinedFormatException;
 
+/**
+ * Class ImageGenerator
+ * @package IllustrationManager
+ */
 class ImageGenerator {
 
+    /**
+     * @var IllustrationManagerConfig
+     */
     protected $illustrationManagerConfig;
+    /**
+     * @var FormatsCollection
+     */
     protected $formatsCollection;
+    /**
+     * @var
+     */
     protected $imagine;
+    /**
+     * @var TransformingImage
+     */
     protected $transformingImage;
-    protected $namesAndPathes;
+    /**
+     * @var NamesAndPaths
+     */
+    protected $namesAndPaths;
 
+    /**
+     * @param IllustrationManagerConfig $illustrationManagerConfig
+     * @param FormatsCollection $formatsCollection
+     * @param NamesAndPaths $namesAndPathes
+     * @param TransformingImage $transformingImage
+     */
     public function __construct(IllustrationManagerConfig $illustrationManagerConfig,
             FormatsCollection $formatsCollection, NamesAndPaths $namesAndPathes, TransformingImage $transformingImage) {
         $this->illustrationManagerConfig = $illustrationManagerConfig;
         $this->formatsCollection = $formatsCollection;
-        $this->namesAndPathes = $namesAndPathes;
+        $this->namesAndPaths = $namesAndPathes;
         $this->transformingImage = $transformingImage;
     }
 
+
     /**
-     * 
-     * @param type $pathToUploadedWFile
-     * @param type $illustrationID
-     * @return type
+     * @param $pathToUploadedWFile
+     * @param $illustrationID
+     * @return string
      */
     public function handleUpload($pathToUploadedWFile, $illustrationID) {
-        $extension = $this->namesAndPathes->getExtensionFromFilename($pathToUploadedWFile);
-        $savePathWFile = $this->namesAndPathes->getFullPathWFilenameForOriginal($illustrationID, $extension);
+        $extension = $this->namesAndPaths->getExtensionFromFilename($pathToUploadedWFile);
+        $savePathWFile = $this->namesAndPaths->getFullPathWFilenameForOriginal($illustrationID, $extension);
         $this->generate($pathToUploadedWFile, $savePathWFile, $extension, $this->illustrationManagerConfig->getConfigForOriginal());
 
         foreach ($this->illustrationManagerConfig->getConfigsToGenerateAfterUpload() as $config) {
@@ -39,30 +64,30 @@ class ImageGenerator {
     }
 
     /**
-     * 
-     * @param type $illustrationID
-     * @param type $extension
-     * @param \IllustrationManager\Config\Config $config
-     * @return string
+     * @param $illustrationID
+     * @param $extension
+     * @param Format $config
+     * @param null $savePathWFile
+     * @return null|string
      */
-    public function makeThumbByID($illustrationID, $extension, Config $config, $savePathWFile = null) {
+    public function makeThumbByID($illustrationID, $extension, Format $config, $savePathWFile = null) {
 
         if (!$savePathWFile) {
             $configHash = $config->getHash();
-            $savePathWFile = $this->namesAndPathes->getFullPathWFilename($illustrationID, $extension, $configHash);
+            $savePathWFile = $this->namesAndPaths->getFullPathWFilename($illustrationID, $extension, $configHash);
         }
 
-        $this->generate($this->namesAndPathes->getFullPathWFilenameForOriginal($illustrationID, $extension), $savePathWFile, $extension, $config);
+        $this->generate($this->namesAndPaths->getFullPathWFilenameForOriginal($illustrationID, $extension), $savePathWFile, $extension, $config);
         return $savePathWFile;
     }
 
     /**
-     * 
-     * @param type $pathWFilename
-     * @param type $savePathWFilename
-     * @param \IllustrationManager\Config\Config $config
+     * @param $pathWFilename
+     * @param $savePathWFilename
+     * @param $extension
+     * @param Format $config
      */
-    public function generate($pathWFilename, $savePathWFilename, $extension, Config $config = null) {
+    public function generate($pathWFilename, $savePathWFilename, $extension, Format $config = null) {
         $this->transformingImage->transform($pathWFilename, $savePathWFilename, $extension, $config);
     }
 

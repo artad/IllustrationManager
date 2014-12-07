@@ -4,19 +4,27 @@ namespace IllustrationManager;
 
 class NamesAndPaths {
 
+    /**
+     * @var
+     */
     protected $hashCache;
+    /**
+     * @var IllustrationManagerConfig
+     */
     protected $illustrationManagerConfig;
 
+    /**
+     * @param IllustrationManagerConfig $illustrationManagerConfig
+     */
     public function __construct(IllustrationManagerConfig $illustrationManagerConfig) {
         $this->illustrationManagerConfig = $illustrationManagerConfig;
     }
 
     /**
-     * 
-     * @param type $illustrationID
-     * @param type $extension
-     * @param type $hash
-     * @return type
+     * @param $illustrationID
+     * @param $extension
+     * @param null $hash
+     * @return string
      */
     public function getFullPathWFilenameForOriginal($illustrationID, $extension, $hash = null) {
         if (!$hash) {
@@ -28,10 +36,10 @@ class NamesAndPaths {
 
     /**
      * 
-     * @param type $id
-     * @param type $extension
-     * @param type $formatPrefix
-     * @return type
+     * @param integer $id
+     * @param string $extension
+     * @param string $formatPrefix
+     * @return string
      */
     public function getFullPathWFilename($illustrationID, $extension, $formatPrefix = '') {
         $pathByIDAndFormat = $this->getPathWFilenameById($illustrationID, $extension, $formatPrefix);
@@ -39,11 +47,10 @@ class NamesAndPaths {
     }
 
     /**
-     * 
-     * @param type $id
-     * @param type $extension
-     * @param type $formatPrefix
-     * @return type
+     * @param $id
+     * @param $extension
+     * @param string $formatPrefix
+     * @return string
      */
     public function getPathWFilenameById($id, $extension, $formatPrefix = '') {
         $hash = $this->getHashForId($id);
@@ -52,25 +59,39 @@ class NamesAndPaths {
     }
 
     /**
-     * 
-     * @param type $hash
-     * @param type $formatPrefix
-     * @return type
+     * @param $hash
+     * @param string $formatPrefix
+     * @return string
      */
     public function getFilenameByHash($hash, $formatPrefix = '') {
         return $formatPrefix . "_" . $hash;
     }
 
+    /**
+     * @param $hash
+     * @return string
+     */
     public function devideHashIntoPath($hash) {
 	$hash = (string) $hash;
+        if(strlen($hash) < 4) {
+            throw new \InvalidArgumentException('Hash string must be 4 chars minimum');
+        }
         return $hash[0] . $hash[1] . DIRECTORY_SEPARATOR . $hash[2] . $hash[3];
     }
 
+    /**
+     * @param $id
+     * @return string
+     */
     public function getHashForId($id) {
         $this->hashCache = sha1($id);
         return $this->hashCache;
     }
 
+    /**
+     * @param $filename
+     * @return string
+     */
     public function getExtensionFromFilename($filename) {
         return strtolower(pathinfo($filename, PATHINFO_EXTENSION));
     }

@@ -6,6 +6,10 @@ namespace IllustrationManager;
 use Gaufrette\Adapter;
 use Imagine\Image\ImagineInterface;
 
+/**
+ * Class Factory
+ * @package IllustrationManager
+ */
 class Factory {
 
     /**
@@ -43,7 +47,6 @@ class Factory {
      * @return Manager
      */
     public function getIllustrationManager() {
-
 
         $predisClient = $this->illustrationManagerConfig->isUseCache() ? new \Predis\Client(null, array('prefix' => 'IllustrationManager')) : null;
 

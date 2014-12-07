@@ -5,26 +5,52 @@ namespace IllustrationManager;
 use \IllustrationManager\Exception\UndefinedFormatException;
 use \Gaufrette\Filesystem;
 
-class Manager {
+/**
+ * Class Manager
+ * @package IllustrationManager
+ */
+class Manager
+{
 
+    /**
+     * @var IllustrationManagerConfig
+     */
     protected $illustrationManagerConfig;
-    protected $namesAndPathes;
+    /**
+     * @var NamesAndPaths
+     */
+    protected $namesAndPaths;
+    /**
+     * @var FormatsCollection
+     */
     protected $formatsCollection;
+    /**
+     * @var ImageGenerator
+     */
     protected $imageGenerator;
+    /**
+     * @var Filesystem
+     */
     protected $filesystem;
+    /**
+     * @var \Predis\Client
+     */
     protected $predis;
 
     /**
-     * 
-     * @param \IllustrationManager\NamesAndPaths $namesAndPathes
-     * @param \IllustrationManager\ImageGenerator $imageGenerator
-     * @param \Gaufrette\Filesystem $filesystem
+     * @param IllustrationManagerConfig $illustrationManagerConfig
+     * @param NamesAndPaths $namesAndPaths
+     * @param FormatsCollection $formatsCollection
+     * @param ImageGenerator $imageGenerator
+     * @param Filesystem $filesystem
+     * @param \Predis\Client $predis
      */
-    public function __construct(IllustrationManagerConfig $illustrationManagerConfig, NamesAndPaths $namesAndPathes,
-            FormatsCollection $formatsCollection, ImageGenerator $imageGenerator, Filesystem $filesystem,
-            \Predis\Client $predis = null) {
+    public function __construct(IllustrationManagerConfig $illustrationManagerConfig, NamesAndPaths $namesAndPaths,
+                                FormatsCollection $formatsCollection, ImageGenerator $imageGenerator, Filesystem $filesystem,
+                                \Predis\Client $predis = null)
+    {
         $this->illustrationManagerConfig = $illustrationManagerConfig;
-        $this->namesAndPathes = $namesAndPathes;
+        $this->namesAndPaths = $namesAndPaths;
         $this->formatsCollection = $formatsCollection;
         $this->imageGenerator = $imageGenerator;
         $this->filesystem = $filesystem;
@@ -32,28 +58,29 @@ class Manager {
     }
 
     /**
-     * 
-     * @param string $pathToUploadedWFile
-     * @param string|integer $illustrationID
+     * @param $pathToUploadedWFile
+     * @param $illustrationID
      * @return string
      */
-    public function handleUpload($pathToUploadedWFile, $illustrationID) {
+    public function handleUpload($pathToUploadedWFile, $illustrationID)
+    {
         $path = $this->imageGenerator->handleUpload($pathToUploadedWFile, $illustrationID);
         return $path;
     }
 
     /**
-     * 
-     * @param type $illustrationID
-     * @param type $extension
-     * @param type $formatName
+     * @param $illustrationID
+     * @param $extension
+     * @param $formatName
      * @return string
+     * @throws UndefinedFormatException
      */
-    public function getThumb($illustrationID, $extension, $formatName) {
+    public function getThumb($illustrationID, $extension, $formatName)
+    {
 
         $config = $this->getFormatConfigByName($formatName);
         $configHash = $config->getHash();
-        
+
         $useCache = $this->illustrationManagerConfig->isUseCache();
         if ($useCache && $this->predis) {
             if ($cached = $this->checkCache($illustrationID, $configHash)) {
@@ -61,9 +88,9 @@ class Manager {
             }
         }
 
-        $savePathWFile = $this->namesAndPathes->getFullPathWFilename($illustrationID, $extension, $configHash);
+        $savePathWFile = $this->namesAndPaths->getFullPathWFilename($illustrationID, $extension, $configHash);
 
-        if ($this->checkFileExistance($savePathWFile)) {
+        if ($this->checkFileExistence($savePathWFile)) {
             if ($useCache && $this->predis) {
                 $this->setCache($illustrationID, $configHash, $savePathWFile);
             }
@@ -79,47 +106,48 @@ class Manager {
     }
 
     /**
-     * 
-     * @param string $formatName
-     * @return  Config
+     * @param $formatName
+     * @return \IllustrationManager\Format\Format
      * @throws UndefinedFormatException
      */
-    protected function getFormatConfigByName($formatName) {
+    protected function getFormatConfigByName($formatName)
+    {
         try {
             $config = $this->formatsCollection->getFormat($formatName);
-            return $config;
         } catch (\InvalidArgumentException $e) {
             throw new UndefinedFormatException(sprintf('Undefined illustration format – %s', $formatName));
         }
+        return $config;
+
     }
 
     /**
-     * 
-     * @param type $illustrationID
-     * @param type $formatName
-     * @return null
+     * @param $illustrationID
+     * @param $configHash
+     * @return string
      */
-    protected function checkCache($illustrationID, $configHash) {
+    protected function checkCache($illustrationID, $configHash)
+    {
         return $this->predis->get($illustrationID . $configHash);
     }
 
     /**
-     * 
-     * @param type $illustrationID
-     * @param type $configHash
-     * @return null
+     * @param $illustrationID
+     * @param $configHash
+     * @param $value
      */
-    protected function setCache($illustrationID, $configHash, $value) {
+    protected function setCache($illustrationID, $configHash, $value)
+    {
         $this->predis->set($illustrationID . $configHash, $value);
         $this->predis->expire($illustrationID . $configHash, 3600);
     }
 
     /**
-     * 
-     * @param string $pathWFile
+     * @param $pathWFile
      * @return bool
      */
-    protected function checkFileExistance($pathWFile) {
+    protected function checkFileExistence($pathWFile)
+    {
         return $this->filesystem->has($pathWFile);
     }
 
