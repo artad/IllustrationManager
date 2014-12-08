@@ -2,7 +2,7 @@
 
 namespace IllustrationManager;
 
-use IllustrationManager\Config\Config;
+use IllustrationManager\Format\Format;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\ImageInterface;
 use Gaufrette\Filesystem;
@@ -27,14 +27,14 @@ class TransformingImage {
      * @param type $pathWFilename
      * @param type $savePathWFilename
      * @param type $extension
-     * @param \IllustrationManager\Config\Config $config
+     * @param \IllustrationManager\Format\Format $formatConfig
      */
-    public function transform($pathWFilename, $savePathWFilename, $extension, Config $config = null) {
+    public function transform($pathWFilename, $savePathWFilename, $extension, Format $formatConfig = null) {
 
         $image = $this->imagine->load($this->filesystem->get($pathWFilename)->getContent());
 
-        if ($config) {
-            $this->transformImage($image, $config);
+        if ($formatConfig) {
+            $this->transformImage($image, $formatConfig);
         }
         $imageContent = $image->get($extension);
         $this->filesystem->write($savePathWFilename, $imageContent, true);
@@ -43,28 +43,28 @@ class TransformingImage {
     /**
      * 
      * @param \Imagine\Image\ImageInterface $image
-     * @param \IllustrationManager\Config\Config $config
+     * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function transformImage(ImageInterface $image, Config $config) {
+    protected function transformImage(ImageInterface $image, Format $formatConfig) {
 
-        if ($config->doCrop() && $config->doCropFirst()) {
-            $this->crop($image, $config);
+        if ($formatConfig->doCrop() && $formatConfig->doCropFirst()) {
+            $this->crop($image, $formatConfig);
         }
 
-        if ($config->doResize()) {
-            $this->resize($image, $config);
+        if ($formatConfig->doResize()) {
+            $this->resize($image, $formatConfig);
         }
 
-        if ($config->doCrop() && !$config->doCropFirst()) {
-            $this->crop($image, $config);
+        if ($formatConfig->doCrop() && !$formatConfig->doCropFirst()) {
+            $this->crop($image, $formatConfig);
         }
 
-        if ($config->doRotate()) {
-            $this->rotate($image, $config);
+        if ($formatConfig->doRotate()) {
+            $this->rotate($image, $formatConfig);
         }
 
-        if ($config->doFlip()) {
-            $this->flip($image, $config);
+        if ($formatConfig->doFlip()) {
+            $this->flip($image, $formatConfig);
         }
     }
 
