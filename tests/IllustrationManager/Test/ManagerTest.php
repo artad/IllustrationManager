@@ -3,6 +3,7 @@
 namespace IllustrationManager\Test;
 
 use IllustrationManager\Exception\UndefinedFormatException;
+use IllustrationManager\Format\Format;
 use IllustrationManager\Manager;
 use IllustrationManager\NamesAndPaths;
 use Imagine\Gd\Imagine;
@@ -10,7 +11,14 @@ use Imagine\Gd\Imagine;
 class ManagerTest extends \PHPUnit_Framework_TestCase
 {
 
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     protected $fileSystemMock;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
     protected $imagine;
 
     /**
@@ -65,7 +73,7 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getIllustrationManagerConfigMock($paramsArray = array()  )
+    protected function getIllustrationManagerConfigMock($paramsArray = array())
     {
         $illustrationManagerConfigMock = $this->getMock(
             'IllustrationManager\\IllustrationManagerConfig', array_merge(array('getBaseFolderName', 'getFolderNameForOriginals'), $paramsArray)
@@ -102,13 +110,11 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function getImageGeneratorMock()
+    protected function getImageGeneratorMock(array $methods = array())
     {
-
-
         $imageGeneratorMock = $this->getMock(
             'IllustrationManager\\ImageGenerator',
-            array(),
+            $methods,
             array(
                 $this->getIllustrationManagerConfigMock(),
                 $this->getFormatsCollectionMock(),
@@ -124,7 +130,7 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
      * @param $imageGeneratorMock
      * @return Manager
      */
-    protected function getManager($imageGeneratorMock, $useCache = false)
+    protected function getManager($imageGeneratorMock, $useCache = false, $getCache = false, $setCache = false)
     {
 
         $illustrationManagerConfigMock = $this->getIllustrationManagerConfigMock(array('isUseCache'));
@@ -132,8 +138,13 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
 
         if ($useCache) {
             $illustrationManagerConfigMock->expects($this->any())->method('isUseCache')->withAnyParameters()->will($this->returnValue(true));
-            $predisMock = $this->getMock('\\Predis\\Client', array('get'));
+            $predisMock = $this->getMock('\\Predis\\Client', array('get', 'set'));
+        }
+        if ($useCache && $getCache) {
             $predisMock->expects($this->any())->method('get')->withAnyParameters()->will($this->returnArgument(0));
+        }
+        if ($useCache && $setCache) {
+            $predisMock->expects($this->atLeastOnce())->method('set');
         }
 
         /* --- */
@@ -183,10 +194,9 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('IllustrationManager\\Exception\\UndefinedFormatException');
         $imageGeneratorMock = $this->getImageGeneratorMock();
         $manager = $this->getManager($imageGeneratorMock);
-        $manager->getThumb(10, 'jpg', 'W1200');
+        $this->assertNotEmpty($manager->getThumb(10, 'jpg', 'W1200'));
 
     }
-
 
 
     /**
@@ -195,7 +205,39 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
     public function testGetThumbCache()
     {
         $imageGeneratorMock = $this->getImageGeneratorMock();
-        $manager = $this->getManager($imageGeneratorMock, true);
+        $manager = $this->getManager($imageGeneratorMock, true, true);
         $this->assertEquals('10abcde', $manager->getThumb(10, 'jpg', 'W900'));
+    }
+
+
+    /**
+     *
+     */
+    public function testGetThumbFileExist()
+    {
+        $this->fileSystemMock->expects($this->any())->method('has')->withAnyParameters()->will($this->returnValue(true));
+        $imageGeneratorMock = $this->getImageGeneratorMock();
+        $manager = $this->getManager($imageGeneratorMock, true, false, true);
+        $this->assertEquals('base' . DIRECTORY_SEPARATOR . 'abcde' . DIRECTORY_SEPARATOR . '12' . DIRECTORY_SEPARATOR . '34' . DIRECTORY_SEPARATOR . 'abcde_1234567890.jpg', $manager->getThumb(10, 'jpg', 'W900'));
+    }
+
+    /**
+     *
+     */
+    public function testGetThumbFileNotExist()
+    {
+        $this->fileSystemMock->expects($this->any())->method('has')->withAnyParameters()->will($this->returnValue(false));
+        $imageGeneratorMock = $this->getImageGeneratorMock(array('makeThumbByID'));
+        $imageGeneratorMock
+            ->expects($this->any())
+            ->method('makeThumbByID')
+            ->with(
+                10,
+                'jpg',
+                $this->isInstanceOf('\\IllustrationManager\\Format\\Format',
+                'base' . DIRECTORY_SEPARATOR . 'abcde' . DIRECTORY_SEPARATOR . '12' . DIRECTORY_SEPARATOR . '34' . DIRECTORY_SEPARATOR . 'abcde_1234567890.jpg'
+                ));
+        $manager = $this->getManager($imageGeneratorMock, true, false, true);
+        $this->assertEquals('base' . DIRECTORY_SEPARATOR . 'abcde' . DIRECTORY_SEPARATOR . '12' . DIRECTORY_SEPARATOR . '34' . DIRECTORY_SEPARATOR . 'abcde_1234567890.jpg', $manager->getThumb(10, 'jpg', 'W900'));
     }
 }
