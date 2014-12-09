@@ -3,9 +3,12 @@
 namespace IllustrationManager;
 
 use IllustrationManager\Format\Format;
+use Imagine\Image\Box;
+use Imagine\Image\Color;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\ImageInterface;
 use Gaufrette\Filesystem;
+use Imagine\Image\Point;
 
 class TransformingImage {
 
@@ -24,9 +27,9 @@ class TransformingImage {
 
     /**
      * 
-     * @param type $pathWFilename
-     * @param type $savePathWFilename
-     * @param type $extension
+     * @param string $pathWFilename
+     * @param string $savePathWFilename
+     * @param string $extension
      * @param \IllustrationManager\Format\Format $formatConfig
      */
     public function transform($pathWFilename, $savePathWFilename, $extension, Format $formatConfig = null) {
@@ -71,29 +74,29 @@ class TransformingImage {
     /**
      * 
      * @param \Imagine\Image\ImageInterface $image
-     * @param \IllustrationManager\Config\Config $config
+     * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function resize(ImageInterface $image, Config $config) {
+    protected function resize(ImageInterface $image, Format $formatConfig) {
 
-        $width = $config->getResizeWidth();
-        $height = $config->getResizeHeight();
+        $width = $formatConfig->getResizeWidth();
+        $height = $formatConfig->getResizeHeight();
 
         if ($width && $height) {            
-            if(!$config->doEnglareToFormat()) {
+            if(!$formatConfig->doEnglareToFormat()) {
                 $currentImageWidth = $image->getSize()->getWidth(); 
                 $width = $currentImageWidth>$width ? $width : $currentImageWidth;
                 $currentImageHeight = $image->getSize()->getHeight(); 
                 $height = $currentImageHeight>$height ? $height : $currentImageHeight;
             }
-            $image->resize(new \Imagine\Image\Box($width, $height));
+            $image->resize(new Box($width, $height));
         }
 
-        if ($width && !$height && ($image->getSize()->getWidth()>$width || $config->doEnglareToFormat())) {
+        if ($width && !$height && ($image->getSize()->getWidth()>$width || $formatConfig->doEnglareToFormat())) {
             
             $image->resize($image->getSize()->widen($width));
         }
 
-        if (!$width && $height  && ($image->getSize()->getHeight()>$height || $config->doEnglareToFormat())) {
+        if (!$width && $height  && ($image->getSize()->getHeight()>$height || $formatConfig->doEnglareToFormat())) {
             $image->resize($image->getSize()->heighten($height));
         }
     }
@@ -101,33 +104,33 @@ class TransformingImage {
     /**
      * 
      * @param \Imagine\Image\ImageInterface $image
-     * @param \IllustrationManager\Config\Config $config
+     * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function crop(ImageInterface $image, Config $config) {
-        $image->crop(new \Imagine\Image\Point($config->getCropStartPointX(), $config->getCropStartPointY()), new \Imagine\Image\Box($config->getCropWidth(), $config->getCropHeight()));
+    protected function crop(ImageInterface $image, Format $formatConfig) {
+        $image->crop(new Point($formatConfig->getCropStartPointX(), $formatConfig->getCropStartPointY()), new Box($formatConfig->getCropWidth(), $formatConfig->getCropHeight()));
     }
 
     /**
      * 
      * @param \Imagine\Image\ImageInterface $image
-     * @param \IllustrationManager\Config\Config $config
+     * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function rotate(ImageInterface $image, Config $config) {
-        $bgColor = $config->getRotateBackground() ? new \Imagine\Image\Color($config->getRotateBackground()) : null; 
-        $image->rotate($config->getRotateAngle(), $bgColor);
+    protected function rotate(ImageInterface $image, Format $formatConfig) {
+        $bgColor = $formatConfig->getRotateBackground() ? new Color($formatConfig->getRotateBackground()) : null;
+        $image->rotate($formatConfig->getRotateAngle(), $bgColor);
     }
 
     /**
      * 
      * @param \Imagine\Image\ImageInterface $image
-     * @param \IllustrationManager\Config\Config $config
+     * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function flip(ImageInterface $image, Config $config) {
-        if ($config->doFlipHorizontal()) {
+    protected function flip(ImageInterface $image, Format $formatConfig) {
+        if ($formatConfig->doFlipHorizontal()) {
             $image->flipHorizontally();
         }
 
-        if ($config->doFlipVertical()) {
+        if ($formatConfig->doFlipVertical()) {
             $image->flipVertically();
         }
     }

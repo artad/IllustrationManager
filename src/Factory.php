@@ -4,7 +4,10 @@ namespace IllustrationManager;
 
 
 use Gaufrette\Adapter;
+use Gaufrette\Filesystem;
+use Imagine\Gd\Imagine;
 use Imagine\Image\ImagineInterface;
+use Predis\Client;
 
 /**
  * Class Factory
@@ -48,7 +51,7 @@ class Factory {
      */
     public function getIllustrationManager() {
 
-        $predisClient = $this->illustrationManagerConfig->isUseCache() ? new \Predis\Client(null, array('prefix' => 'IllustrationManager')) : null;
+        $predisClient = $this->illustrationManagerConfig->isUseCache() ? new Client(null, array('prefix' => 'IllustrationManager')) : null;
 
         if(!$this->imagine) {
             $this->imagine = $this->getDefaultImagine();
@@ -58,19 +61,19 @@ class Factory {
             $this->filesystemAdapter = $this->getDefaultFilesystemAdapter();
         }
 
-        $filesystem = new \Gaufrette\Filesystem($this->filesystemAdapter);
-        $namesAndPaths = new \IllustrationManager\NamesAndPaths($this->illustrationManagerConfig);
-        $transformingImage = new \IllustrationManager\TransformingImage(
+        $filesystem = new Filesystem($this->filesystemAdapter);
+        $namesAndPaths = new NamesAndPaths($this->illustrationManagerConfig);
+        $transformingImage = new TransformingImage(
             $this->imagine,
             $filesystem
         );
-        $imageGenerator = new \IllustrationManager\ImageGenerator(
+        $imageGenerator = new ImageGenerator(
             $this->illustrationManagerConfig,
             $this->formatsCollection,
             $namesAndPaths,
             $transformingImage
         );
-        return new \IllustrationManager\Manager(
+        return new Manager(
             $this->illustrationManagerConfig,
             $namesAndPaths,
             $this->formatsCollection,
@@ -85,7 +88,7 @@ class Factory {
      * @return \Imagine\Gd\Imagine
      */
     protected function getDefaultImagine() {
-        return new \Imagine\Gd\Imagine();
+        return new Imagine();
     }
 
 
@@ -93,6 +96,6 @@ class Factory {
      * @return Adapter\Local
      */
     protected function getDefaultFilesystemAdapter() {
-        return new \Gaufrette\Adapter\Local($_SERVER["DOCUMENT_ROOT"]);
+        return new Adapter\Local($_SERVER["DOCUMENT_ROOT"]);
     }
 } 

@@ -4,6 +4,7 @@ namespace IllustrationManager;
 
 use \IllustrationManager\Exception\UndefinedFormatException;
 use \Gaufrette\Filesystem;
+use Predis\Client;
 
 /**
  * Class Manager
@@ -47,7 +48,7 @@ class Manager
      */
     public function __construct(IllustrationManagerConfig $illustrationManagerConfig, NamesAndPaths $namesAndPaths,
                                 FormatsCollection $formatsCollection, ImageGenerator $imageGenerator, Filesystem $filesystem,
-                                \Predis\Client $predis = null)
+                                Client $predis = null)
     {
         $this->illustrationManagerConfig = $illustrationManagerConfig;
         $this->namesAndPaths = $namesAndPaths;

@@ -35,8 +35,8 @@ class NamesAndPaths {
     }
 
     /**
-     * 
-     * @param string $extension
+     * @param $illustrationID
+     * @param $extension
      * @param string $formatPrefix
      * @return string
      */
