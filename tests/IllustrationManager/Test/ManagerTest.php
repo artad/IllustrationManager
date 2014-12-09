@@ -138,7 +138,7 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
 
         if ($useCache) {
             $illustrationManagerConfigMock->expects($this->any())->method('isUseCache')->withAnyParameters()->will($this->returnValue(true));
-            $predisMock = $this->getMock('\\Predis\\Client', array('get', 'set'));
+            $predisMock = $this->getMock('\\Predis\\Client', array('get', 'set'), array(), '', false);
         }
         if ($useCache && $getCache) {
             $predisMock->expects($this->any())->method('get')->withAnyParameters()->will($this->returnArgument(0));
