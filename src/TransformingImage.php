@@ -10,45 +10,52 @@ use Imagine\Image\ImageInterface;
 use Gaufrette\Filesystem;
 use Imagine\Image\Point;
 
-class TransformingImage {
+class TransformingImage
+{
 
     protected $imagine;
     protected $filesystem;
 
     /**
-     * 
+     *
      * @param \Imagine\Image\ImagineInterface $imagine
      * @param \Gaufrette\Filesystem $filesystem
      */
-    public function __construct(ImagineInterface $imagine, Filesystem $filesystem) {
+    public function __construct(ImagineInterface $imagine, Filesystem $filesystem)
+    {
         $this->imagine = $imagine;
         $this->filesystem = $filesystem;
     }
 
     /**
-     * 
+     *
      * @param string $pathWFilename
      * @param string $savePathWFilename
      * @param string $extension
      * @param \IllustrationManager\Format\Format $formatConfig
      */
-    public function transform($pathWFilename, $savePathWFilename, $extension, Format $formatConfig = null) {
+    public function transform($pathWFilename, $savePathWFilename, $extension, Format $formatConfig = null)
+    {
 
-        $image = $this->imagine->load($this->filesystem->get($pathWFilename)->getContent());
+        $fileContent = $this->filesystem->get($pathWFilename)->getContent();
+        $image = $this->imagine->load($fileContent);
 
         if ($formatConfig) {
             $this->transformImage($image, $formatConfig);
         }
+
         $imageContent = $image->get($extension);
         $this->filesystem->write($savePathWFilename, $imageContent, true);
     }
 
+
     /**
-     * 
+     *
      * @param \Imagine\Image\ImageInterface $image
      * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function transformImage(ImageInterface $image, Format $formatConfig) {
+    protected function transformImage(ImageInterface $image, Format $formatConfig)
+    {
 
         if ($formatConfig->doCrop() && $formatConfig->doCropFirst()) {
             $this->crop($image, $formatConfig);
@@ -71,61 +78,77 @@ class TransformingImage {
         }
     }
 
+
     /**
-     * 
+     *
      * @param \Imagine\Image\ImageInterface $image
      * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function resize(ImageInterface $image, Format $formatConfig) {
+    protected function resize(ImageInterface $image, Format $formatConfig)
+    {
 
-        $width = $formatConfig->getResizeWidth();
-        $height = $formatConfig->getResizeHeight();
+        $resizeWidth = $formatConfig->getResizeWidth();
+        $resizeHeight = $formatConfig->getResizeHeight();
 
-        if ($width && $height) {            
-            if(!$formatConfig->doEnglareToFormat()) {
-                $currentImageWidth = $image->getSize()->getWidth(); 
-                $width = $currentImageWidth>$width ? $width : $currentImageWidth;
-                $currentImageHeight = $image->getSize()->getHeight(); 
-                $height = $currentImageHeight>$height ? $height : $currentImageHeight;
+        $imageWidth = $image->getSize()->getWidth();
+        $imageHeight = $image->getSize()->getHeight();
+
+        $resizeBox = null;
+
+        if ($resizeWidth && $resizeHeight) {
+
+            if (!$formatConfig->doEnglareToFormat()) {
+                $resizeWidth = $imageWidth > $resizeWidth ? $resizeWidth : $imageWidth;
+                $resizeHeight = $imageHeight > $resizeHeight ? $resizeHeight : $imageHeight;
             }
-            $image->resize(new Box($width, $height));
+
+            if ($resizeWidth != $imageWidth || $resizeHeight != $imageHeight) {
+                $resizeBox = new Box($resizeWidth, $resizeHeight);
+            }
         }
 
-        if ($width && !$height && ($image->getSize()->getWidth()>$width || $formatConfig->doEnglareToFormat())) {
-            
-            $image->resize($image->getSize()->widen($width));
+
+        if ($resizeWidth && !$resizeHeight && ($imageWidth > $resizeWidth || $formatConfig->doEnglareToFormat())) {
+            $resizeBox = $image->getSize()->widen($resizeWidth);
         }
 
-        if (!$width && $height  && ($image->getSize()->getHeight()>$height || $formatConfig->doEnglareToFormat())) {
-            $image->resize($image->getSize()->heighten($height));
+        if (!$resizeWidth && $resizeHeight && ($imageHeight > $resizeHeight || $formatConfig->doEnglareToFormat())) {
+            $resizeBox = $image->getSize()->heighten($resizeHeight);
+        }
+
+        if($resizeBox) {
+            $image->resize($resizeBox);
         }
     }
 
     /**
-     * 
+     *
      * @param \Imagine\Image\ImageInterface $image
      * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function crop(ImageInterface $image, Format $formatConfig) {
+    protected function crop(ImageInterface $image, Format $formatConfig)
+    {
         $image->crop(new Point($formatConfig->getCropStartPointX(), $formatConfig->getCropStartPointY()), new Box($formatConfig->getCropWidth(), $formatConfig->getCropHeight()));
     }
 
     /**
-     * 
+     *
      * @param \Imagine\Image\ImageInterface $image
      * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function rotate(ImageInterface $image, Format $formatConfig) {
+    protected function rotate(ImageInterface $image, Format $formatConfig)
+    {
         $bgColor = $formatConfig->getRotateBackground() ? new Color($formatConfig->getRotateBackground()) : null;
         $image->rotate($formatConfig->getRotateAngle(), $bgColor);
     }
 
     /**
-     * 
+     *
      * @param \Imagine\Image\ImageInterface $image
      * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function flip(ImageInterface $image, Format $formatConfig) {
+    protected function flip(ImageInterface $image, Format $formatConfig)
+    {
         if ($formatConfig->doFlipHorizontal()) {
             $image->flipHorizontally();
         }
