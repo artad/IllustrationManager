@@ -91,9 +91,7 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
         $namesAndPathsMock = $this->getMock(
             'IllustrationManager\\NamesAndPaths', array('getHashForId'), array($this->getIllustrationManagerConfigMock())
         );
-
         $namesAndPathsMock->expects($this->any())->method('getHashForId')->with($this->anything())->will($this->returnValue('1234567890'));
-
         return $namesAndPathsMock;
     }
 
@@ -106,12 +104,32 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
         return $transformingImageMock;
     }
 
+    /**
+     * @param array $methods
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getImagineMock(array $methods = array())
+    {
+        return $this->getMockForAbstractClass('Imagine\\Image\\ImagineInterface', $methods);
+    }
+
+    /**
+     * @param array $methods
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function getFilesystemMock(array $methods = array())
+    {
+        $localAdapter = $this->getMock('Gaufrette\\Adapter\\Local', array(), array($_SERVER["DOCUMENT_ROOT"]));
+        return $this->getMock('Gaufrette\\Filesystem', array(), array($localAdapter));
+    }
+
 
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
     protected function getImageGeneratorMock(array $methods = array())
     {
+
         $imageGeneratorMock = $this->getMock(
             'IllustrationManager\\ImageGenerator',
             $methods,
@@ -119,6 +137,8 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
                 $this->getIllustrationManagerConfigMock(),
                 $this->getFormatsCollectionMock(),
                 $this->getNamesAndPathsMock(),
+                $this->getFilesystemMock(),
+                $this->getImagineMock(),
                 $this->getTransformingImageMock(),
             ));
         //$imageGeneratorMock->method('handleUpload')->with($this->anything())->will($this->returnValue('pathToOriginal'));
@@ -137,7 +157,6 @@ class ManagerTest extends \PHPUnit_Framework_TestCase
         $predisMock = null;
 
         if ($useCache) {
-
             $illustrationManagerConfigMock->expects($this->any())->method('isUseCache')->withAnyParameters()->will($this->returnValue(true));
             //$predisMock = $this->getMock('\\Predis\\Client', array('get', 'set'), array(), '', false);
             $predisMock = $this
