@@ -9,11 +9,11 @@ namespace IllustrationManager\Format;
 class Format {
 
     /**
-     * @var
+     * @var integer
      */
     protected $resizeWidth;
     /**
-     * @var
+     * @var integer
      */
     protected $resizeHeight;
     /**
@@ -21,19 +21,19 @@ class Format {
      */
     protected $englareToFormat = false;
     /**
-     * @var
+     * @var integer
      */
     protected $cropWidth;
     /**
-     * @var
+     * @var integer
      */
     protected $cropHeight;
     /**
-     * @var
+     * @var integer
      */
     protected $cropStartPointX;
     /**
-     * @var
+     * @var integer
      */
     protected $cropStartPointY;
     /**
@@ -41,11 +41,11 @@ class Format {
      */
     protected $cropFirst = false;
     /**
-     * @var
+     * @var integer
      */
     protected $rotateAngle;
     /**
-     * @var
+     * @var string
      */
     protected $rotateBackground;
     /**
@@ -57,11 +57,11 @@ class Format {
      */
     protected $flipVertical = false;
     /**
-     * @var
+     * @var integer
      */
     protected $quality;
     /**
-     * @var
+     * @var string
      */
     protected $hash;
 
@@ -72,26 +72,27 @@ class Format {
         return new self;
     }
 
-    /**
-     *
-     */
-    public function __construct() {
-        
-    }
 
     /**
-     * @param $width
+     * @param null $width
      * @param null $height
      * @return $this
      */
-    public function resize($width, $height = null) {
+    public function resize($width = null, $height = null) {
 
-        if ($height < 1 && $width < 1) {
+        if (!$height && !$width) {
+            throw new \InvalidArgumentException(sprintf(
+                'Either Width or Height must be not 0'
+            ));
+        }
+
+        if (null !== $height && (int) $height < 1 || null !== $width && (int) $width < 1) {
             throw new \InvalidArgumentException(sprintf(
                     'Width and Height cannot be 0 or negative, current size ' .
                     'is %sx%s', $width, $height
             ));
         }
+
         $this->resizeWidth = (int) $width;
         $this->resizeHeight = (int) $height;
         return $this;
@@ -106,11 +107,18 @@ class Format {
      */
     public function crop($width, $height, $startPointX = null, $startPointY = null) {
 
-        if ($height < 1 || $width < 1) {
+        if ((int) $height < 1 || (int) $width < 1) {
             throw new \InvalidArgumentException(sprintf(
                     'Length of either side cannot be 0 or negative, current size ' .
                     'is %sx%s', $width, $height
             ));
+        }
+
+
+        if ((int) $startPointX < 0 || (int) $startPointY < 0) {
+            throw new \InvalidArgumentException(
+                'A coordinate cannot be positioned outside of a bounding box'
+            );
         }
 
         if ($this->resizeWidth === null AND $this->resizeHeight === null) {
@@ -129,7 +137,7 @@ class Format {
      * @return $this
      */
     public function cropFirst($cropFirst = true) {
-        $this->cropFirst = $cropFirst;
+        $this->cropFirst = (bool) $cropFirst;
         return $this;
     }
 
@@ -138,7 +146,7 @@ class Format {
      * @return $this
      */
     public function englareToFormat($englareToFormat = true) {
-        $this->englareToFormat = $englareToFormat;
+        $this->englareToFormat = (bool) $englareToFormat;
         return $this;
     }
 
@@ -156,17 +164,16 @@ class Format {
     /**
      * @return $this
      */
-    public function flipHorizontal() {
-        $this->flipHorizontal = true;
+    public function flipHorizontal($flipHorizontal = true) {
+        $this->flipHorizontal = (bool) $flipHorizontal;
         return $this;
-        
     }
 
     /**
      * @return $this
      */
-    public function flipVertical() {
-        $this->flipVertical = true;
+    public function flipVertical($flipVertical = true) {
+        $this->flipVertical = (bool) $flipVertical;
         return $this;
     }
 
@@ -175,8 +182,8 @@ class Format {
      * @return $this
      */
     public function setQuality($quality) {
-        if (!is_numeric($quality)) {
-            throw new \InvalidArgumentException('Quality should be Int');
+        if (!is_numeric($quality) OR $quality < 0) {
+            throw new \InvalidArgumentException('Quality should be Positive Int');
         }
         $this->quality = $quality;
         return $this;

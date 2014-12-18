@@ -78,7 +78,6 @@ class Manager
      */
     public function getThumb($illustrationID, $extension, $formatName)
     {
-
         $config = $this->getFormatByName($formatName);
         $configHash = $config->getHash();
 
@@ -113,12 +112,7 @@ class Manager
      */
     protected function getFormatByName($formatName)
     {
-        try {
-            $config = $this->formatsCollection->getFormat($formatName);
-        } catch (\InvalidArgumentException $e) {
-            throw new UndefinedFormatException(sprintf('Undefined illustration format – %s', $formatName));
-        }
-        return $config;
+        return $this->formatsCollection->getFormat($formatName);
     }
 
     /**
@@ -126,7 +120,7 @@ class Manager
      * @param string $configHash
      * @return string
      */
-    protected  function checkCache($illustrationID, $configHash)
+    protected function checkCache($illustrationID, $configHash)
     {
         return $this->predis->get($illustrationID . $configHash);
     }

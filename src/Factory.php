@@ -71,6 +71,8 @@ class Factory {
             $this->illustrationManagerConfig,
             $this->formatsCollection,
             $namesAndPaths,
+            $filesystem,
+            $this->imagine,
             $transformingImage
         );
         return new Manager(

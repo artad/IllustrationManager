@@ -13,40 +13,21 @@ use Imagine\Image\Point;
 class TransformingImage
 {
 
+    /**
+     * @var ImagineInterface
+     */
     protected $imagine;
-    protected $filesystem;
 
     /**
      *
      * @param \Imagine\Image\ImagineInterface $imagine
      * @param \Gaufrette\Filesystem $filesystem
      */
-    public function __construct(ImagineInterface $imagine, Filesystem $filesystem)
+    public function __construct(ImagineInterface $imagine)
     {
         $this->imagine = $imagine;
-        $this->filesystem = $filesystem;
     }
 
-    /**
-     *
-     * @param string $pathWFilename
-     * @param string $savePathWFilename
-     * @param string $extension
-     * @param \IllustrationManager\Format\Format $formatConfig
-     */
-    public function transform($pathWFilename, $savePathWFilename, $extension, Format $formatConfig = null)
-    {
-
-        $fileContent = $this->filesystem->get($pathWFilename)->getContent();
-        $image = $this->imagine->load($fileContent);
-
-        if ($formatConfig) {
-            $this->transformImage($image, $formatConfig);
-        }
-
-        $imageContent = $image->get($extension);
-        $this->filesystem->write($savePathWFilename, $imageContent, true);
-    }
 
 
     /**
@@ -54,7 +35,7 @@ class TransformingImage
      * @param \Imagine\Image\ImageInterface $image
      * @param \IllustrationManager\Format\Format $formatConfig
      */
-    protected function transformImage(ImageInterface $image, Format $formatConfig)
+    public function transformImage(ImageInterface $image, Format $formatConfig)
     {
 
         if ($formatConfig->doCrop() && $formatConfig->doCropFirst()) {
@@ -106,7 +87,6 @@ class TransformingImage
                 $resizeBox = new Box($resizeWidth, $resizeHeight);
             }
         }
-
 
         if ($resizeWidth && !$resizeHeight && ($imageWidth > $resizeWidth || $formatConfig->doEnglareToFormat())) {
             $resizeBox = $image->getSize()->widen($resizeWidth);

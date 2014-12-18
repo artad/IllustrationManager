@@ -2,7 +2,9 @@
 
 namespace IllustrationManager;
 
+use Gaufrette\Filesystem;
 use IllustrationManager\Format\Format;
+use Imagine\Image\ImagineInterface;
 
 /**
  * Class ImageGenerator
@@ -18,10 +20,17 @@ class ImageGenerator {
      * @var FormatsCollection
      */
     protected $formatsCollection;
+
     /**
-     * @var
+     * @var ImagineInterface
      */
     protected $imagine;
+
+    /**
+     * @var Filesystem
+     */
+    protected $filesystem;
+
     /**
      * @var TransformingImage
      */
@@ -34,14 +43,16 @@ class ImageGenerator {
     /**
      * @param IllustrationManagerConfig $illustrationManagerConfig
      * @param FormatsCollection $formatsCollection
-     * @param NamesAndPaths $namesAndPathes
+     * @param NamesAndPaths $namesAndPaths
      * @param TransformingImage $transformingImage
      */
     public function __construct(IllustrationManagerConfig $illustrationManagerConfig,
-            FormatsCollection $formatsCollection, NamesAndPaths $namesAndPathes, TransformingImage $transformingImage) {
+            FormatsCollection $formatsCollection, NamesAndPaths $namesAndPaths, Filesystem $filesystem, ImagineInterface $imagine, TransformingImage $transformingImage) {
         $this->illustrationManagerConfig = $illustrationManagerConfig;
         $this->formatsCollection = $formatsCollection;
-        $this->namesAndPaths = $namesAndPathes;
+        $this->namesAndPaths = $namesAndPaths;
+        $this->filesystem = $filesystem;
+        $this->imagine = $imagine;
         $this->transformingImage = $transformingImage;
     }
 
@@ -55,7 +66,6 @@ class ImageGenerator {
         $extension = $this->namesAndPaths->getExtensionFromFilename($pathToUploadedWFile);
         $savePathWFile = $this->namesAndPaths->getFullPathWFilenameForOriginal($illustrationID, $extension);
         $this->generate($pathToUploadedWFile, $savePathWFile, $extension, $this->illustrationManagerConfig->getConfigForOriginal());
-
         foreach ($this->illustrationManagerConfig->getConfigsToGenerateAfterUpload() as $config) {
             $this->makeThumbByID($illustrationID, $extension, $config);
         }
@@ -70,12 +80,10 @@ class ImageGenerator {
      * @return string
      */
     public function makeThumbByID($illustrationID, $extension, Format $config, $savePathWFile = null) {
-
         if (!$savePathWFile) {
             $configHash = $config->getHash();
             $savePathWFile = $this->namesAndPaths->getFullPathWFilename($illustrationID, $extension, $configHash);
         }
-
         $this->generate($this->namesAndPaths->getFullPathWFilenameForOriginal($illustrationID, $extension), $savePathWFile, $extension, $config);
         return $savePathWFile;
     }
@@ -86,8 +94,15 @@ class ImageGenerator {
      * @param $extension
      * @param Format $config
      */
-    public function generate($pathWFilename, $savePathWFilename, $extension, Format $config = null) {
-        $this->transformingImage->transform($pathWFilename, $savePathWFilename, $extension, $config);
-    }
+    protected  function generate($pathWFilename, $savePathWFilename, $extension, Format $config = null) {
+        $fileContent = $this->filesystem->get($pathWFilename)->getContent();
+        $image = $this->imagine->load($fileContent);
 
+        if($config) {
+            $this->transformingImage->transformImage($image, $config);
+        }
+
+        $imageContent = $image->get($extension);
+        $this->filesystem->write($savePathWFilename, $imageContent, true);
+    }
 }
